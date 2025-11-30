@@ -5,8 +5,8 @@ BUILD_DIR = build
 SRC_DIR = src
 INCLUDE_DIR = include
 
-SOURCES = $(SRC_DIR)/main.c $(SRC_DIR)/game.c $(SRC_DIR)/territory.c
-OBJECTS = $(BUILD_DIR)/main.o $(BUILD_DIR)/game.o $(BUILD_DIR)/territory.o
+SOURCES = $(SRC_DIR)/main.c $(SRC_DIR)/game.c $(SRC_DIR)/territory.c $(SRC_DIR)/mission.c $(SRC_DIR)/game_engine.c
+OBJECTS = $(BUILD_DIR)/main.o $(BUILD_DIR)/game.o $(BUILD_DIR)/territory.o $(BUILD_DIR)/mission.o $(BUILD_DIR)/game_engine.o
 EXECUTABLE = $(BUILD_DIR)/war-game
 
 .PHONY: build run test valgrind clean help
@@ -23,6 +23,12 @@ $(BUILD_DIR)/game.o: $(SRC_DIR)/game.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c -I$(INCLUDE_DIR) $< -o $@
 
 $(BUILD_DIR)/territory.o: $(SRC_DIR)/territory.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c -I$(INCLUDE_DIR) $< -o $@
+
+$(BUILD_DIR)/mission.o: $(SRC_DIR)/mission.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c -I$(INCLUDE_DIR) $< -o $@
+
+$(BUILD_DIR)/game_engine.o: $(SRC_DIR)/game_engine.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c -I$(INCLUDE_DIR) $< -o $@
 
 $(BUILD_DIR):
