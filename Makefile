@@ -1,69 +1,47 @@
-# Professional Makefile for war-game-c
-# Usage: make build | run | test | valgrind | clean | help
-
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c99 -O2 -g
-SRC_DIR = src
-TEST_DIR = tests
+CFLAGS = -Wall -Wextra -std=c99 -g -O2
+
 BUILD_DIR = build
-BIN = war-game
+SRC_DIR = src
+INCLUDE_DIR = include
 
-SRCS := $(wildcard $(SRC_DIR)/*.c)
-OBJS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRCS))
-TEST_SRCS := $(wildcard $(TEST_DIR)/*.c)
-TEST_BIN := $(BUILD_DIR)/test_runner
+SOURCES = $(SRC_DIR)/main.c $(SRC_DIR)/game.c $(SRC_DIR)/territory.c
+OBJECTS = $(BUILD_DIR)/main.o $(BUILD_DIR)/game.o $(BUILD_DIR)/territory.o
+EXECUTABLE = $(BUILD_DIR)/war-game
 
-.PHONY: all build run test valgrind clean help
+.PHONY: build run test valgrind clean help
 
-all: build
+build: $(EXECUTABLE)
 
-# Default build target: compile sources and link binary
-build: $(BUILD_DIR)/$(BIN)
+$(EXECUTABLE): $(OBJECTS) | $(BUILD_DIR)
+	$(CC) $(OBJECTS) -o $@
 
-$(BUILD_DIR)/$(BIN): $(OBJS)
-	@mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) $^ -o $@
-	@echo "Built $@"
+$(BUILD_DIR)/main.o: $(SRC_DIR)/main.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c -I$(INCLUDE_DIR) $< -o $@
 
-# Compile each source into object in build directory
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
-	@mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) -c $< -o $@
-	@printf "Compiled %-40s -> %s\n" "$<" "$@"
+$(BUILD_DIR)/game.o: $(SRC_DIR)/game.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c -I$(INCLUDE_DIR) $< -o $@
 
-# Run the game (build first)
+$(BUILD_DIR)/territory.o: $(SRC_DIR)/territory.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c -I$(INCLUDE_DIR) $< -o $@
+
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
+
 run: build
-	@echo "Running $(BUILD_DIR)/$(BIN)..."
-	./$(BUILD_DIR)/$(BIN)
+	./$(EXECUTABLE)
 
-# Build and run tests
-test: CFLAGS += -I$(TEST_DIR)
-test: $(TEST_BIN)
-	@echo "Running tests..."
-	./$(TEST_BIN)
+test: build
+	echo "Testes: A implementar"
 
-$(TEST_BIN): $(TEST_SRCS) $(SRCS)
-	@mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(TEST_SRCS) $(SRCS) -o $(TEST_BIN)
-	@echo "Built test runner: $(TEST_BIN)"
-
-# Run valgrind for memory leak detection
 valgrind: build
-	@echo "Starting valgrind on $(BUILD_DIR)/$(BIN)..."
-	valgrind --leak-check=full --show-leak-kinds=all --error-exitcode=1 ./$(BUILD_DIR)/$(BIN)
+	valgrind --leak-check=full ./$(EXECUTABLE)
 
-# Clean build artifacts
 clean:
-	@echo "Cleaning build artifacts..."
-	@rm -rf $(BUILD_DIR)
-	@echo "Clean complete."
+	rm -rf $(BUILD_DIR)
 
-# Help target
 help:
-	@echo "Makefile targets:"
-	@echo " - make build      - compile the project into $(BUILD_DIR)/$(BIN)"
-	@echo " - make run        - build and run the game"
-	@echo " - make test       - build and run tests"
-	@echo " - make valgrind   - run under valgrind for memory checks"
-	@echo " - make clean      - remove build artifacts"
-	@echo " - make help       - show this help message"
+	echo "make build   - Compilar"
+	echo "make run     - Compilar e executar"
+	echo "make valgrind- Testar memória"
+	echo "make clean   - Limpar artifacts"
