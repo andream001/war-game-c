@@ -16,22 +16,29 @@ Territory* create_territory(int id, const char* name, int army_count, int owner)
     return t;
 }
 
-// Simular ataque entre territórios
+// Simular ataque entre territórios (combate em múltiplas rodadas)
 int attack_territory(Territory* attacker, Territory* defender) {
     if (!attacker || !defender) return -1;
     if (attacker->army_count <= 0) return 0;  // Sem exército
-    
-    // Cálculo simples: ataque vs defesa
-    int attacker_loss = attacker->army_count / 3;
-    int defender_loss = defender->army_count / 2;
-    
-    attacker->army_count -= attacker_loss;
-    defender->army_count -= defender_loss;
-    
-    if (defender->army_count <= 0) {
+
+    int troops_a = attacker->army_count;
+    int troops_d = defender->army_count;
+
+    while (troops_a > 0 && troops_d > 0) {
+        int loss_a = troops_a / 3 + 1;
+        int loss_d = troops_d / 2 + 1;
+        troops_a -= loss_a;
+        troops_d -= loss_d;
+    }
+
+    if (troops_d <= 0 && troops_a > 0) {
+        attacker->army_count = troops_a;
+        defender->army_count = 1;
         defender->owner = attacker->owner;
         return 1;  // Vitória do atacante
     }
+
+    attacker->army_count = (troops_a > 0) ? troops_a : 0;
     return 0;  // Ataque falhou
 }
 

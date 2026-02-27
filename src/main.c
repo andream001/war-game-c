@@ -4,17 +4,28 @@
 #include "../include/mission.h"
 #include "../include/game_engine.h"
 
-// Callback: Função de ataque personalizada
+// Callback: Função de ataque personalizada (combate em múltiplas rodadas)
 int custom_attack(Territory* attacker, Territory* defender) {
     if (!attacker || !defender) return 0;
-    int loss_attacker = attacker->army_count / 3;
-    int loss_defender = defender->army_count / 2;
-    attacker->army_count -= loss_attacker;
-    defender->army_count -= loss_defender;
-    if (defender->army_count <= 0) {
+
+    int troops_a = attacker->army_count;
+    int troops_d = defender->army_count;
+
+    while (troops_a > 0 && troops_d > 0) {
+        int loss_a = troops_a / 3 + 1;
+        int loss_d = troops_d / 2 + 1;
+        troops_a -= loss_a;
+        troops_d -= loss_d;
+    }
+
+    if (troops_d <= 0 && troops_a > 0) {
+        attacker->army_count = troops_a;
+        defender->army_count = 1;
         defender->owner = attacker->owner;
         return 1;
     }
+
+    attacker->army_count = (troops_a > 0) ? troops_a : 0;
     return 0;
 }
 
@@ -53,7 +64,7 @@ int main() {
     printf("Status: %s\n\n", engine_get_status(engine));
     
     // 4. Criar territórios
-    Territory* brasil = create_territory(1, "Brasil", 100, 1);
+    Territory* brasil = create_territory(1, "Brasil", 200, 1);
     Territory* argentina = create_territory(2, "Argentina", 50, 2);
     Territory* uruguai = create_territory(3, "Uruguai", 40, 2);
     
@@ -63,7 +74,7 @@ int main() {
     printf("  %s (Inimigo): %d exércitos\n\n", uruguai->name, uruguai->army_count);
     
     // 5. Executar ataques via engine
-    printf("[Ã ATAQUE]\n");
+    printf("[ATAQUE]\n");
     int attack1 = engine_execute_attack(engine, brasil, argentina);
     printf("  Ataque 1: %s\n", attack1 ? "VENCEU!" : "Falhou");
     printf("  Status: %s\n\n", engine_get_status(engine));
